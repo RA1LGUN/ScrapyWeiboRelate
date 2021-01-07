@@ -102,5 +102,5 @@ ITEM_PIPELINES = {
 from fake_useragent import UserAgent
 
 MONGO_URI = 'mongodb://localhost:27017/'
-MONGO_DATABASE = 'weibo11'
+MONGO_DATABASE = 'weibo12'
 items = 'user'

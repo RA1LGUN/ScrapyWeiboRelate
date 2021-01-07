@@ -17,7 +17,7 @@ from ScrapyWeiboRelate.items import ScrapyWeiboRelateItem
 
 class WeiboSpider(scrapy.Spider):
     name = 'weibo'
-    user_id = int('6056282307')
+    user_id = int('5533039912')
     follow_list = []  # 存储爬取到的所有关注微博的user_id
     follow_name_list = []  # 存储爬取到的所有关注微博的用户名
     fans_list = []  # 存储爬取到的所有粉丝微博的user_id

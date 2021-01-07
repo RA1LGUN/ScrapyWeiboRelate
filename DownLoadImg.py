@@ -64,7 +64,7 @@ class downloadimg():
             print(oldname, '======>', newname)
 
 
-if __name__ == '__main__':
-    di = downloadimg('weibo9',dic_path = r'Test/Test/img')
-    di.run()
-    di.replace_img()
+# if __name__ == '__main__':
+#     di = downloadimg('weibo9',dic_path = r'Test/Test/img')
+#     di.run()
+#     di.replace_img()
