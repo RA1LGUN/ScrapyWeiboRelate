@@ -6,7 +6,7 @@ from Format_data import d2j
 uid = '5533039912'
 pathname = './Draw'
 dbname = 'weibo12'
-# check = CheckCookies(dbname).main()
+check = CheckCookies(dbname).main()
 
 cmdline.execute(['scrapy', 'crawl', 'weibo'])
 
