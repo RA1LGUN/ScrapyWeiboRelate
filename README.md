@@ -1,6 +1,9 @@
 # ScrapyWeiboRelate
 
-通过Scrapy爬取微博数据并通过AntV绘制出人际关系网络图
+通过Scrapy爬取微博数据并通过AntV绘制出人际关系网络图<br>
+![weibo](https://badgen.net/badge/weibo/NLP/cyan?icon=github)
+![GitHub license](https://badgen.net/github/license/HUANGZHIHAO1994/weibo-analysis-and-visualization?color=green)
+![python](https://badgen.net/badge/python/%3E=3.6/8d6fe7)
 
 ## 项目说明
 
@@ -18,7 +21,8 @@
 4. 运行run.py
 
 ### 特别注意
-因为我的cookie池规模太小，故在spiders/weibo.py的73行,107行,132行,166行,258行加了time.sleep,运行速度慢非其他原因
+1. 因为我的cookie池规模太小，故在spiders/weibo.py的73行,107行,132行,166行,258行加了time.sleep,运行速度慢非其他原因
+2. 训练语料不足导致NLP的准确率为89%,故本项目仅附训练语料（语料出处不详，于CDSN下载）
 
 ### 最后效果
 1. 1000个节点左右
@@ -32,4 +36,17 @@
 ![14000](https://github.com/RA1LGUN/ScrapyWeiboRelate/blob/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20210107115817.png)
 
 ## 完成进度
-现主要功能都已开发完成,正在优化图像可读性及其他小工具
+现主要功能都已开发完成,正在优化图像可读性及其他小工具并将友善度和社交关系相关联
+
+## 感谢
+
+感谢对我的帮助及指导
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<img src="http://qlogo1.store.qq.com/qzone/1845370492/1845370492/100?1570026854" title="Code">
+
+## Licence
+
+MIT
