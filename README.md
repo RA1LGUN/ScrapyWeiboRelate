@@ -42,9 +42,6 @@
 
 感谢对我的帮助及指导
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
 <img src="http://qlogo1.store.qq.com/qzone/1845370492/1845370492/100?1570026854" title="Code">
 
 ## Licence
