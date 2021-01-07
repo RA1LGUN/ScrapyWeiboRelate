@@ -30,3 +30,6 @@
 
 3. 10000+个节点
 ![14000](https://github.com/RA1LGUN/ScrapyWeiboRelate/blob/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20210107115817.png)
+
+## 完成进度
+现主要功能都已开发完成,正在优化图像可读性及其他小工具
