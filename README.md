@@ -1,7 +1,6 @@
 # ScrapyWeiboRelate
 
 通过Scrapy爬取微博数据并通过AntV绘制出人际关系网络图<br>
-![weibo](https://badgen.net/badge/weibo/NLP/cyan?icon=github)
 ![GitHub license](https://badgen.net/github/license/HUANGZHIHAO1994/weibo-analysis-and-visualization?color=green)
 ![python](https://badgen.net/badge/python/%3E=3.6/8d6fe7)
 
