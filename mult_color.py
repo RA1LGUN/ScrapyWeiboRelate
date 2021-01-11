@@ -2,30 +2,25 @@ import json
 import re
 
 import pymongo
-import copy
-
 
 class d2j():
 
-    def __init__(self, dbname, path, uid):
+    def __init__(self,dbname,path,uid):
         self.to_json_dic = {}
         self.collection = pymongo.MongoClient("mongodb://localhost:27017/")[dbname]['user']
-        self.collection2 = pymongo.MongoClient("mongodb://localhost:27017/")[dbname]['relate']
+        self.collection2 =  pymongo.MongoClient("mongodb://localhost:27017/")[dbname]['relate']
         self.list1 = []
         self.nodelist = []
         self.list2 = []
         self.edgeslist = []
         self.filename = path
         self.uid = uid
-        self.user = {self.uid: [{}]}
-        self.follower = {self.uid: [{}]}
-        self.user_follower = None
-        self.follower_user = None
 
     def main(self):
 
         self.get_nodes()
-        self.get_dataStructure()
+        # self.get_edges()
+        self.color_edges()
         self.get_edges()
 
         self.to_json_dic['nodes'] = self.nodelist
@@ -35,7 +30,7 @@ class d2j():
             json.dump(self.to_json_dic, file_obj)
             print(self.to_json_dic)
 
-    def str_label(self, item):
+    def str_label(self,item):
         strlable = ''
         try:
             strlable = 'nick_name : %s' % item['nick_name']
@@ -63,18 +58,18 @@ class d2j():
             pass
         return strlable
 
-    def img_path(self, img_item):
+    def img_path(self,img_item):
         img_localpath = './img/%s.%s'
         if bool(re.findall(r'[0-9]{3}/(.+.jpg)', img_item['src_url'])):
             jpgname = img_item['src_url'][-10:]
-            jpgname = jpgname.replace('%', 'PC')
+            jpgname = jpgname.replace('%','PC')
             # print(jpgname)
-            jpg_path = img_localpath % (jpgname, 'jpg')
+            jpg_path =  img_localpath%(jpgname,'jpg')
             return jpg_path
         elif bool(re.findall(r'/images/(.+.gif)', img_item['src_url'])):
             gifname = img_item['src_url'][-10:]
-            gifname = gifname.replace('%', 'PC')
-            gif_path = img_localpath % (gifname, 'gif')
+            gifname = gifname.replace('%','PC')
+            gif_path =  img_localpath%(gifname, 'gif')
             return gif_path
 
     def get_nodes(self):
@@ -90,8 +85,14 @@ class d2j():
                 labeldict['nick_name'] = item['nick_name']
             except:
                 labeldict['nick_name'] = item['id']
-            labeldict['gender'] = item['gender']
-            labeldict['province'] = item['province']
+            try:
+                labeldict['gender'] = item['gender']
+            except:
+                pass
+            try:
+                labeldict['province'] = item['province']
+            except:
+                pass
             try:
                 labeldict['labels'] = item['labels']
             except:
@@ -100,7 +101,10 @@ class d2j():
                 labeldict['city'] = item['city']
             except:
                 pass
-            labeldict['vip_level'] = item['vip_level']
+            try:
+                labeldict['vip_level'] = item['vip_level']
+            except:
+                pass
             try:
                 labeldict['tweets_num'] = item['tweets_num']
                 labeldict['follows_num'] = item['follows_num']
@@ -114,11 +118,11 @@ class d2j():
                 clsnum = 0
             else:
                 try:
-                    folnum = list(self.collection2.find({'followuser': item['id']}).sort("deepth", 1))[0]['deepth']
+                    folnum = list(self.collection2.find({'followuser':item['id']}).sort("deepth",1))[0]['deepth']
                 except:
                     folnum = 10
                 try:
-                    fannum = list(self.collection2.find({'userid': item['id']}).sort("deepth", 1))[0]['deepth']
+                    fannum = list(self.collection2.find({'userid':item['id']}).sort("deepth",1))[0]['deepth']
                 except:
                     folnum = 10
 
@@ -137,122 +141,196 @@ class d2j():
         pass
 
 
-    def get_dataStructure(self):
-        for l in self.collection2.find():
-            if str(l["userid"]) == self.uid:
-                self.user[self.uid][0][str(l["followuser"])] = [{}]
 
-            if str(l["followuser"]) == self.uid:
-                self.follower[self.uid][0][str(l["userid"])] = [{}]
+    # def get_color(self,item):
+    #
+    #     if item['userid'] == '6056282307':
+    #         linecolor = '#FF6A6A'
+    #     else:
+    #         linecolor = '#436EEE'
+    #
+    #     return linecolor
 
-        self.user_follower = copy.deepcopy(self.user)
-        self.follower_user = copy.deepcopy(self.follower)
+    def color_edges(self):
+        firfo = list(self.collection2.find({'followuser':self.uid}))
+        while firfo:                #第一层，从userid开始发散
+            for firfollow in firfo:
 
-        for l in self.collection2.find():
-            for u in list(self.user[self.uid][0].keys()):
-                if str(l["userid"]) == u and str(l["followuser"]) != self.uid:
-                    self.user[self.uid][0][u][0][str(l["followuser"])] = [{}]
+                secfo = list(self.collection2.find({'followuser':firfollow['userid']}))
+                while secfo:        #第二层，关注
+                    for secfollow in secfo:
 
-        for l in self.collection2.find():
-            for u in list(self.follower[self.uid][0].keys()):
-                if str(l["followuser"]) == u and str(l["userid"]) != self.uid:
-                    self.follower[self.uid][0][u][0][str(l["userid"])] = [{}]
+                        secfofa = list(self.collection2.find({'userid':secfollow['userid']}))
+                        while secfofa:  #第三层 粉丝
+                            for thifan in secfofa:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thifan['userid'])
+                                edgesvardict['target'] = str(thifan['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thifan['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thifan['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#7975E7')
+                                self.edgeslist.append(edgesvardict)
+                            secfofa = []
 
-        for l in self.collection2.find():
-            for u in list(self.follower[self.uid][0].keys()):
-                if str(l["userid"]) == u and str(l["followuser"]) != self.uid:
-                    self.follower_user[self.uid][0][u][0][str(l["followuser"])] = [{}]
+                        secfofo = list(self.collection2.find({'followuser':secfollow['userid']}))
+                        while secfofo:  #第三层  关注
+                            for thirfo in secfofo:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thirfo['userid'])
+                                edgesvardict['target'] = str(thirfo['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thirfo['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thirfo['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#0F3057')
+                                self.edgeslist.append(edgesvardict)
+                            secfofo = []
+                        edgesvardict = {}
+                        edgesvardict['source'] = str(secfollow['userid'])
+                        edgesvardict['target'] = str(secfollow['followuser'])
+                        # edgesvardict['label'] = str(item2['deepth'])
+                        edgesvardict['value'] = str(secfollow['weight'] + 1)
+                        edgesvardict['lineWidth'] = str(6 - int(secfollow['deepth'] * 1.5))
+                        edgesvardict['color'] = str('#00587A')
+                        self.edgeslist.append(edgesvardict)
+                    secfo = []
 
-        for l in self.collection2.find():
-            for u in list(self.user[self.uid][0].keys()):
-                if str(l["followuser"]) == u and str(l["userid"]) != self.uid:
-                    self.user_follower[self.uid][0][u][0][str(l["userid"])] = [{}]
+
+                secfa = list(self.collection2.find({'userid':firfollow['userid']}))
+                while secfa:        #第二层 粉丝
+                    for secfan in secfa:
+                        secfafa = list(self.collection2.find({'userid': secfan['followuser']}))
+
+                        while secfafa:      #第三层 粉丝
+                            for thifan in secfafa:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thifan['userid'])
+                                edgesvardict['target'] = str(thifan['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thifan['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thifan['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#008891')
+                                self.edgeslist.append(edgesvardict)
+                            secfafa = []
+
+                        secfafo = list(self.collection2.find({'followuser': secfan['followuser']}))
+                        while secfafo:      #第三层 关注
+                            for thifo in secfafo:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thifo['userid'])
+                                edgesvardict['target'] = str(thifo['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thifo['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thifo['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#9AB3F5')
+                                self.edgeslist.append(edgesvardict)
+                            secfafo = []
+                        edgesvardict = {}
+                        edgesvardict['source'] = str(secfan['userid'])
+                        edgesvardict['target'] = str(secfan['followuser'])
+                        # edgesvardict['label'] = str(item2['deepth'])
+                        edgesvardict['value'] = str(secfan['weight'] + 1)
+                        edgesvardict['lineWidth'] = str(6 - int(secfan['deepth'] * 1.5))
+                        edgesvardict['color'] = str('#A3D8F4')
+                        self.edgeslist.append(edgesvardict)
+                    secfa = []
+            firfo = []
+
+        firfa = list(self.collection2.find({'userid': self.uid}))
+        while firfa:  # 第一层，从userid开始发散
+            for firfallow in firfa:
+
+                sec_fo = list(self.collection2.find({'followuser': firfallow['followuser']}))
+                while sec_fo:  # 第二层，关注
+                    for sec_follow in sec_fo:
+
+                        sec_fofa = list(self.collection2.find({'userid': sec_follow['userid']}))
+                        while sec_fofa: #第三层 粉丝
+                            for thifan in sec_fofa:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thifan['userid'])
+                                edgesvardict['target'] = str(thifan['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thifan['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thifan['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#FF414D')
+                                self.edgeslist.append(edgesvardict)
+                            sec_fofa = []
+
+                        sec_fofo = list(self.collection2.find({'followuser': sec_follow['followuser']}))
+                        while sec_fofo: #第三层 关注
+                            for thirfo in sec_fofo:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thirfo['userid'])
+                                edgesvardict['target'] = str(thirfo['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thirfo['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thirfo['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#F56A79')
+                                self.edgeslist.append(edgesvardict)
+                            sec_fofo = []
+                        edgesvardict = {}
+                        edgesvardict['source'] = str(sec_follow['userid'])
+                        edgesvardict['target'] = str(sec_follow['followuser'])
+                        # edgesvardict['label'] = str(item2['deepth'])
+                        edgesvardict['value'] = str(sec_follow['weight'] + 1)
+                        edgesvardict['lineWidth'] = str(6 - int(sec_follow['deepth'] * 1.5))
+                        edgesvardict['color'] = str('#DE4463')
+                        self.edgeslist.append(edgesvardict)
+                    sec_fo = []
+
+                sec_fa = list(self.collection2.find({'userid': firfallow['followuser']}))
+                while sec_fa:   #第二层 粉丝
+                    for sec_fan in sec_fa:
+                        sec_fafa = list(self.collection2.find({'userid': sec_fan['followuser']}))
+
+                        while sec_fafa: #第三层 关注
+                            for thifan in sec_fafa:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thifan['userid'])
+                                edgesvardict['target'] = str(thifan['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thifan['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thifan['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#D789D7')
+                                self.edgeslist.append(edgesvardict)
+                            sec_fafa = []
+
+                        sec_fafo = list(self.collection2.find({'followuser': sec_fan['userid']}))
+                        while sec_fafo: #第三层 粉丝
+                            for thirfo in sec_fafo:
+                                edgesvardict = {}
+                                edgesvardict['source'] = str(thirfo['userid'])
+                                edgesvardict['target'] = str(thirfo['followuser'])
+                                # edgesvardict['label'] = str(item2['deepth'])
+                                edgesvardict['value'] = str(thirfo['weight'] + 1)
+                                edgesvardict['lineWidth'] = str(6 - int(thirfo['deepth'] * 1.5))
+                                edgesvardict['color'] = str('#9D6579')
+                                self.edgeslist.append(edgesvardict)
+                            sec_fafo = []
+                        edgesvardict = {}
+                        edgesvardict['source'] = str(sec_fan['userid'])
+                        edgesvardict['target'] = str(sec_fan['followuser'])
+                        # edgesvardict['label'] = str(item2['deepth'])
+                        edgesvardict['value'] = str(sec_fan['weight'] + 1)
+                        edgesvardict['lineWidth'] = str(6 - int(sec_fan['deepth'] * 1.5))
+                        edgesvardict['color'] = str('#5D54A4')
+                        self.edgeslist.append(edgesvardict)
+                    sec_fa = []
+            firfa = []
 
     def get_edges(self):
-
-        # handle user edge
-        user_target = list(self.user.keys())
-        user_source = list(list(self.user.values())[0][0].keys())
-        for source in user_source:
-            edgesvardict = {}
-            edgesvardict['source'] = source
-            edgesvardict['target'] = user_target[0]
-            edgesvardict['value'] = str(1)
-            edgesvardict['lineWidth'] = str(6 - int(1 * 1.5))
-            edgesvardict['color'] = '#8B0000'
-            self.edgeslist.append(edgesvardict)
-            self.list2.append(int(user_target[0]))
-            self.list2.append(int(source))
-
-        user_target = copy.deepcopy(user_source)
-        for target in user_target:
-            user_source = list(self.user[self.uid][0][target][0].keys())
-            for source in user_source:
-                edgesvardict = {}
-                edgesvardict['source'] = source
-                edgesvardict['target'] = target
-                edgesvardict['value'] = str(1)
-                edgesvardict['lineWidth'] = str(6 - int(2 * 1.5))
-                edgesvardict['color'] = '#FF0000'
-                self.edgeslist.append(edgesvardict)
-                self.list2.append(int(target))
-                self.list2.append(int(source))
-
-        # handle follower edges
-        follower_source = list(self.follower.keys())
-        follower_target = list(list(self.follower.values())[0][0].keys())
-        for target in follower_target:
-            edgesvardict = {}
-            edgesvardict['source'] = follower_source[0]
-            edgesvardict['target'] = target
-            edgesvardict['value'] = str(1)
-            edgesvardict['lineWidth'] = str(6 - 1 * 1.5)
-            edgesvardict['color'] = '#00008B'
-            self.edgeslist.append(edgesvardict)
-            self.list2.append(int(target))
-            self.list2.append(int(follower_source[0]))
-
-        follower_source = copy.deepcopy(follower_target)
-        for source in follower_source:
-            follower_target = list(self.follower[self.uid][0][source][0].keys())
-            for target in follower_target:
-                edgesvardict = {}
-                edgesvardict['source'] = source
-                edgesvardict['target'] = target
-                edgesvardict['value'] = str(1)
-                edgesvardict['lineWidth'] = str(6 - 2 * 1.5)
-                edgesvardict['color'] = '#0000FF'
-                self.edgeslist.append(edgesvardict)
-                self.list2.append(int(target))
-                self.list2.append(int(source))
-
-        follower_user_target = list(list(self.follower_user.values())[0][0].keys())
-        for target in follower_user_target:
-            follower_user_source = list(self.follower_user[self.uid][0][target][0].keys())
-            for source in follower_user_source:
-                edgesvardict = {}
-                edgesvardict['source'] = source
-                edgesvardict['target'] = target
-                edgesvardict['value'] = str(1)
-                edgesvardict['lineWidth'] = str(6 - 2 * 1.5)
-                edgesvardict['color'] = '#FF0000'
-                self.edgeslist.append(edgesvardict)
-                self.list2.append(int(target))
-                self.list2.append(int(source))
-
-        user_follower_source = list(list(self.user_follower.values())[0][0].keys())
-        for source in user_follower_source:
-            user_follower_target = list(self.user_follower[self.uid][0][source][0].keys())
-            for target in user_follower_target:
-                edgesvardict = {}
-                edgesvardict['source'] = source
-                edgesvardict['target'] = target
-                edgesvardict['value'] = str(1)
-                edgesvardict['lineWidth'] = str(6 - 2 * 1.5)
-                edgesvardict['color'] = '#0000FF'
-                self.edgeslist.append(edgesvardict)
-                self.list2.append(int(target))
-                self.list2.append(int(source))
+        for item2 in self.collection2.find():
+            # edgesvardict ={}
+            # edgesvardict['source'] = str(item2['userid'])
+            # edgesvardict['target'] = str(item2['followuser'])
+            # # edgesvardict['label'] = str(item2['deepth'])
+            # edgesvardict['value'] = str(item2['weight']+1)
+            # edgesvardict['lineWidth'] = str(6 - int(item2['deepth'] * 1.5))
+            # edgesvardict['color'] = str(self.get_color(item2))
+            # self.edgeslist.append(edgesvardict)
+            self.list2.append(int(item2['userid']))
+            self.list2.append(int(item2['followuser']))
 
         list1 = list(set(self.list1))
         except_list = list(set(self.list2).difference(set(list1)))
@@ -267,7 +345,7 @@ class d2j():
 
 
 if __name__ == '__main__':
-    pathname = 'data.json'
-    dbname = 'weibo9'
-    uid = '3746520465'
-    d2j(dbname, pathname, uid).main()
+    pathname = 'data3.json'
+    dbname = 'weibo10'
+    uid = '6056282307'
+    d2j(dbname,pathname,uid).main()
