@@ -2,6 +2,8 @@ import json
 import re
 
 import pymongo
+from numpy import mean
+
 
 class d2j():
 
