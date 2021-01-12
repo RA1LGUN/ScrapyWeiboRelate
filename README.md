@@ -38,6 +38,8 @@
 
 4. 粉丝及关注用不同颜色的线区分
 ![1000](https://github.com/RA1LGUN/ScrapyWeiboRelate/blob/master/Pic/muti_color.png)
+![1000](https://github.com/RA1LGUN/ScrapyWeiboRelate/blob/master/Pic/5000color.png)
+
 
 ## 完成进度
 现主要功能都已开发完成,正在优化图像可读性及其他小工具，并将友善度和社交关系相关联
