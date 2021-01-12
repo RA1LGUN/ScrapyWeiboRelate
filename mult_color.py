@@ -112,6 +112,20 @@ class d2j():
             except:
                 pass
 
+            try:
+                labeldict['friendly'] = item['friendly_score']
+            except:
+                pass
+
+            try:
+                avg_fans,ave_follow = self.frendly(item)
+                labeldict['avg_fans'] = avg_fans
+                labeldict['avg_follow'] = ave_follow
+                avg_fans = 0.5
+                ave_follow = 0.5
+            except:
+                pass
+
             vardict['label'] = json.dumps(labeldict)
 
             if item['id'] == str(self.uid):
@@ -137,8 +151,41 @@ class d2j():
 
             self.nodelist.append(vardict)
 
-    def frendly(self):
-        pass
+    def frendly(self,item):
+        avg_fans_score = []
+        avg_follow_score = []
+        x = list(self.collection2.aggregate([{'$match': {'userid': item['id']}},
+                                   {
+                                       '$lookup': {
+                                           "from": "user",
+                                           "localField": "followuser",
+                                           "foreignField": "id",
+                                           "as": "score"
+                                       }}
+                                   ]))
+        y = list(self.collection2.aggregate([{'$match': {'followuser': item['id']}},
+                                   {
+                                       '$lookup': {
+                                           "from": "user",
+                                           "localField": "userid",
+                                           "foreignField": "id",
+                                           "as": "score"
+                                       }}
+                                   ]))
+        for i1 in range(len(x)):
+            i1 = i1 - 1
+            avg_fans_score.append(x[i1]['score'][0]['friendly_score'])
+
+        for i2 in range(len(y)):
+            i2 = i2 - 1
+            avg_follow_score.append(y[i2]['score'][0]['friendly_score'])
+
+        if avg_fans_score:
+            result1 = mean(avg_fans_score)
+        if avg_follow_score:
+            result2 = mean(avg_follow_score)
+
+        return result1,result2
 
 
 
