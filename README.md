@@ -3,6 +3,7 @@
 通过Scrapy爬取微博数据并通过AntV绘制出人际关系网络图<br>
 ![GitHub license](https://badgen.net/github/license/HUANGZHIHAO1994/weibo-analysis-and-visualization?color=green)
 ![python](https://badgen.net/badge/python/%3E=3.6/8d6fe7)
+- en [English](/README_EN.md)
 
 ## 项目说明
 
