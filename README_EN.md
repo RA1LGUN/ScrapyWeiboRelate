@@ -11,7 +11,7 @@ Crawl tweet data via Scrapy and map out a network of people via AntV<br>
 
 2. recent user tweets
 
-3. crawl users' social connections (followers/followers)
+3. crawl users' social connections (followers/fans)
 
 ### How to use
 1. modify user_id = int('user_id') in spiders/weibo.py to determine which user is the core of the relationship
