@@ -1,6 +1,7 @@
 # ScrapyWeiboRelate
 
 Crawl tweet data via Scrapy and map out a network of people via AntV<br>
+zh [Chinese](/README.md)<br>
 ![GitHub license](https://badgen.net/github/license/HUANGZHIHAO1994/weibo-analysis-and-visualization?color=green)
 ![python](https://badgen.net/badge/python/%3E=3.6/8d6fe7)
 
